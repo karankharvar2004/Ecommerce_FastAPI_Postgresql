@@ -414,24 +414,6 @@ Remove Product
 
 ---
 
-# 🔮 Future Enhancements
-
-- Orders Module
-- Checkout Flow
-- Payment Gateway Integration
-- Wishlist Module
-- Coupon System
-- Address Management
-- Order History
-- Admin Dashboard
-- User Roles & Permissions
-- Email Verification
-- Password Reset
-- CI/CD Pipeline
-- Kubernetes Deployment
-
----
-
 # 🧹 Useful Docker Commands
 
 ## Show Running Containers
