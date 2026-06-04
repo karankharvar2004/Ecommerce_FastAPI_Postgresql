@@ -19,10 +19,10 @@ router.get("/")(
     CartController.get_cart
 )
 
-router.patch("/{cart_id}")(
+router.patch("/{cart_item_id}")(
     CartController.update_cart_quantity
 )
 
-router.delete("/{cart_id}")(
+router.delete("/{cart_item_id}")(
     CartController.delete_cart_item
 )

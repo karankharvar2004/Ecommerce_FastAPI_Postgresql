@@ -4,11 +4,11 @@ from sqlalchemy import select
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from sqlalchemy.orm import selectinload
+
 from src.database.models.cart_model import Cart
 
 from src.database.models.product_model import Product
-
-from sqlalchemy.orm import selectinload
 
 
 class CartSchema:
@@ -76,15 +76,15 @@ class CartSchema:
     @classmethod
     async def update_cart_item(
         cls,
-        existing_cart_item,
+        cart_item,
         db: AsyncSession
     ):
 
         await db.commit()
 
-        await db.refresh(existing_cart_item)
+        await db.refresh(cart_item)
 
-        return existing_cart_item
+        return cart_item
 
 
     @classmethod
@@ -94,12 +94,14 @@ class CartSchema:
         db: AsyncSession
     ):
 
-        query = (select(Cart).options(selectinload(Cart.product))
-        .where(
-            Cart.user_id == user_id,
-            Cart.is_deleted == False
+        query = (
+            select(Cart)
+            .options(selectinload(Cart.product))
+            .where(
+                Cart.user_id == user_id,
+                Cart.is_deleted == False
+            )
         )
-    )
 
         result = await db.execute(query)
 
@@ -109,22 +111,22 @@ class CartSchema:
     @classmethod
     async def get_single_cart_item(
         cls,
-        cart_id: UUID,
+        cart_item_id: UUID,
         user_id: UUID,
         db: AsyncSession
     ):
 
         query = (
-        select(Cart)
-        .options(
-            selectinload(Cart.product)
+            select(Cart)
+            .options(
+                selectinload(Cart.product)
+            )
+            .where(
+                Cart.id == cart_item_id,
+                Cart.user_id == user_id,
+                Cart.is_deleted == False
+            )
         )
-        .where(
-            Cart.id == cart_id,
-            Cart.user_id == user_id,
-            Cart.is_deleted == False
-        )
-    )
 
         result = await db.execute(query)
 
@@ -134,7 +136,7 @@ class CartSchema:
     @classmethod
     async def soft_delete_cart_item(
         cls,
-        existing_cart_item,
+        cart_item,
         db: AsyncSession
     ):
 

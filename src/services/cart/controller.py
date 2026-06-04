@@ -51,15 +51,51 @@ class CartController:
                 detail="Product not found"
             )
 
+        # OUT OF STOCK VALIDATION
+
+        if existing_product.stock <= 0:
+
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Product is out of stock"
+            )
+
+        # REQUESTED QUANTITY VALIDATION
+
+        if payload.quantity > existing_product.stock:
+
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=(
+                    f"Only {existing_product.stock} items available in stock"
+                )
+            )
+
         existing_cart_item = await CartSchema.get_existing_cart_item(
             current_user.id,
             payload.product_id,
             db
         )
 
+        # EXISTING CART ITEM VALIDATION
+
         if existing_cart_item:
 
-            existing_cart_item.quantity += payload.quantity
+            final_quantity = (
+                existing_cart_item.quantity
+                + payload.quantity
+            )
+
+            if final_quantity > existing_product.stock:
+
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=(
+                        f"Only {existing_product.stock} items available in stock"
+                    )
+                )
+
+            existing_cart_item.quantity = final_quantity
 
             updated_cart_item = await CartSchema.update_cart_item(
                 existing_cart_item,
@@ -69,7 +105,7 @@ class CartController:
             return ResponseHandler.success(
                 message="Cart Updated Successfully",
                 data={
-                    "cart_id": updated_cart_item.id,
+                    "cart_item_id": updated_cart_item.id,
                     "product_title": updated_cart_item.product.title,
                     "quantity": updated_cart_item.quantity,
                     "price": updated_cart_item.product.price,
@@ -79,6 +115,8 @@ class CartController:
                     )
                 }
             )
+
+        # CREATE NEW CART ITEM
 
         new_cart_item = await CartSchema.create_cart_item(
             user_id=current_user.id,
@@ -90,7 +128,7 @@ class CartController:
         return ResponseHandler.success(
             message="Product Added To Cart",
             data={
-                "cart_id": new_cart_item.id,
+                "cart_item_id": new_cart_item.id,
                 "product_title": new_cart_item.product.title,
                 "quantity": new_cart_item.quantity,
                 "price": new_cart_item.product.price,
@@ -130,7 +168,7 @@ class CartController:
             total_amount += subtotal
 
             cart_data.append({
-                "cart_id": item.id,
+                "cart_item_id": item.id,
                 "product_id": item.product.id,
                 "product_title": item.product.title,
                 "product_image": item.product.product_image,
@@ -153,7 +191,7 @@ class CartController:
     async def update_cart_quantity(
         cls,
         payload: UpdateCartSerializer,
-        cart_id: UUID = Path(...),
+        cart_item_id: UUID = Path(...),
         current_user: User = Depends(
             AuthDependency.get_current_user
         ),
@@ -161,7 +199,7 @@ class CartController:
     ):
 
         existing_cart_item = await CartSchema.get_single_cart_item(
-            cart_id,
+            cart_item_id,
             current_user.id,
             db
         )
@@ -171,6 +209,17 @@ class CartController:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Cart item not found"
+            )
+
+        # STOCK VALIDATION
+
+        if payload.quantity > existing_cart_item.product.stock:
+
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=(
+                    f"Only {existing_cart_item.product.stock} items available in stock"
+                )
             )
 
         existing_cart_item.quantity = payload.quantity
@@ -183,7 +232,7 @@ class CartController:
         return ResponseHandler.success(
             message="Cart Quantity Updated Successfully",
             data={
-                "cart_id": updated_cart_item.id,
+                "cart_item_id": updated_cart_item.id,
                 "quantity": updated_cart_item.quantity
             }
         )
@@ -192,7 +241,7 @@ class CartController:
     @classmethod
     async def delete_cart_item(
         cls,
-        cart_id: UUID = Path(...),
+        cart_item_id: UUID = Path(...),
         current_user: User = Depends(
             AuthDependency.get_current_user
         ),
@@ -200,7 +249,7 @@ class CartController:
     ):
 
         existing_cart_item = await CartSchema.get_single_cart_item(
-            cart_id,
+            cart_item_id,
             current_user.id,
             db
         )
@@ -212,6 +261,27 @@ class CartController:
                 detail="Cart item not found"
             )
 
+        # REDUCE QUANTITY IF MORE THAN 1
+
+        if existing_cart_item.quantity > 1:
+
+            existing_cart_item.quantity -= 1
+
+            updated_cart_item = await CartSchema.update_cart_item(
+                existing_cart_item,
+                db
+            )
+
+            return ResponseHandler.success(
+                message="Cart Quantity Reduced Successfully",
+                data={
+                    "cart_item_id": updated_cart_item.id,
+                    "remaining_quantity": updated_cart_item.quantity
+                }
+            )
+
+        # DELETE ONLY WHEN QUANTITY IS 1
+
         existing_cart_item.is_deleted = True
 
         existing_cart_item.deleted_at = datetime.utcnow()
@@ -222,5 +292,5 @@ class CartController:
         )
 
         return ResponseHandler.success(
-            message="Cart Item Deleted Successfully"
+            message="Product Removed From Cart Successfully"
         )
