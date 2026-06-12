@@ -1,47 +1,18 @@
 services:
-
-  db:
-    image: postgres:16
-
-    container_name: ecommerce_db
-
-    restart: unless-stopped
-
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 7006
-      POSTGRES_DB: Ecommerce_CompanyArc_DB
-
-    ports:
-      - "5555:5432"
-
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
 
     container_name: ecommerce_app
-
-    restart: unless-stopped
 
     ports:
       - "8000:8000"
 
-    depends_on:
-      db:
-        condition: service_healthy
-
     env_file:
       - .env
 
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
-volumes:
-  postgres_data:
+    restart: unless-stopped
