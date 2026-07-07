@@ -11,6 +11,7 @@ on:
 
 jobs:
   build:
+
     runs-on: ubuntu-latest
 
     env:
@@ -32,6 +33,7 @@ jobs:
       CLOUDFRONT_URL: https://example.com
 
     steps:
+
       - name: Checkout Repository
         uses: actions/checkout@v4
 
@@ -48,3 +50,7 @@ jobs:
       - name: Verify FastAPI Application
         run: |
           python -c "from src.main import app; print('Application Loaded Successfully')"
+
+      - name: Build Docker Image
+        run: |
+          docker build -t karn21/ecommerce-fastapi:latest .
