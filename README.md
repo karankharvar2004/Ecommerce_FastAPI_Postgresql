@@ -1,26 +1,26 @@
 # 🛒 Ecommerce FastAPI Backend
 
-A production-style Ecommerce Backend built with **FastAPI**, **PostgreSQL**, **SQLAlchemy Async**, **Alembic**, **JWT Authentication**, **AWS S3**, **CloudFront**, and **Docker**.
+A production-style Ecommerce Backend built using **FastAPI**, **PostgreSQL**, **SQLAlchemy Async**, **Alembic**, **JWT Authentication**, **AWS S3**, **CloudFront**, and **Docker**.
 
-This project follows a modular, service-oriented architecture and demonstrates real-world backend development practices including authentication, product management, image uploads, cart management, pagination, filtering, soft deletion, Dockerization, and database migrations.
+This project follows a modular, service-oriented architecture inspired by real-world backend development practices. It demonstrates authentication, product management, image uploads, cart management, pagination, filtering, sorting, soft deletion, Dockerization, and database migrations.
 
 ---
 
 # 🚀 Features
 
-## Authentication
+## 🔐 Authentication
 
 - User Registration
 - User Login
 - JWT Access Token
 - JWT Refresh Token
 - Protected APIs
-- Password Hashing
+- Password Hashing (bcrypt)
 - Role-Based Architecture Ready
 
 ---
 
-## Product Management
+## 🛍️ Product Management
 
 - Create Product
 - Get Product List
@@ -29,25 +29,26 @@ This project follows a modular, service-oriented architecture and demonstrates r
 - Soft Delete Product
 - Pagination
 - Sorting
+- Filtering
 - Stock Management
 - Product Image Upload
 
 ---
 
-## Cart Management
+## 🛒 Cart Management
 
 - Add Product To Cart
 - Update Cart Quantity
 - Reduce Quantity
 - Remove Product From Cart
-- Stock Validation
 - Quantity Validation
+- Stock Validation
 - Cart Total Calculation
-- Multiple Products Per User Cart
+- Multiple Products Per User
 
 ---
 
-## Image Uploads
+## 🖼️ Image Uploads
 
 - AWS S3 Integration
 - CloudFront CDN Integration
@@ -56,56 +57,50 @@ This project follows a modular, service-oriented architecture and demonstrates r
 
 ---
 
-## Database
+## 🗄️ Database
 
 - PostgreSQL
 - Async SQLAlchemy
 - Alembic Migrations
-- Relationships
 - UUID Primary Keys
+- Model Relationships
 - Soft Delete Support
 
 ---
 
-## Docker Support
+## 🐳 Docker
 
+- Single Docker Image Architecture
 - Dockerized FastAPI Application
-- Dockerized PostgreSQL
-- Docker Compose
-- Persistent Database Volumes
+- External PostgreSQL Connection
 - Environment Variable Configuration
-- Container Networking
+- Portable Deployment Workflow
 
 ---
 
 # 🛠️ Tech Stack
 
 ## Backend
-
 - FastAPI
 - Python 3.12
 
 ## Database
-
 - PostgreSQL
 - SQLAlchemy Async
 - Alembic
 
 ## Authentication
-
 - JWT
 - Passlib
 - Bcrypt
 
 ## Storage
-
 - AWS S3
 - CloudFront
 
 ## Deployment
-
 - Docker
-- Docker Compose
+- Docker Hub
 
 ---
 
@@ -116,13 +111,15 @@ Ecommerce Postgresql/
 │
 ├── alembic/
 │   ├── versions/
+│   └── env.py
 │
 ├── src/
 │   │
 │   ├── database/
-│   │   ├── db_config.py
 │   │   ├── config.py
+│   │   ├── db_config.py
 │   │   ├── dependencies.py
+│   │   ├── jwt_handler.py
 │   │   └── models/
 │   │
 │   ├── services/
@@ -136,56 +133,92 @@ Ecommerce Postgresql/
 │   │
 │   └── main.py
 │
-├── .env
+├── .env.example
 ├── .dockerignore
 ├── .gitignore
 ├── alembic.ini
 ├── Dockerfile
 ├── docker-compose.yml
 ├── requirements.txt
-│
 └── README.md
 ```
 
 ---
 
+# ⚙️ Prerequisites
+
+Before running the project, make sure you have installed:
+
+- Python 3.12+
+- PostgreSQL
+- Docker
+- Git
+
+---
+
 # ⚙️ Environment Variables
 
-Create a `.env` file in the project root.
+Create a `.env` file by copying the example file:
+
+```bash
+cp .env.example .env
+```
+
+Update the values according to your local environment:
 
 ```env
 # DATABASE
 
 DB_USER=postgres
 DB_PASSWORD=your_password
-DB_HOST=db
+DB_HOST=host.docker.internal
 DB_PORT=5432
 DB_NAME=Ecommerce_CompanyArc_DB
 
 # JWT
 
 SECRET_KEY=your_secret_key
-
 ALGORITHM=HS256
-
 ACCESS_TOKEN_EXPIRE_MINUTES=60
-
 REFRESH_TOKEN_EXPIRE_DAYS=7
 
 # AWS S3
 
 AWS_ACCESS_KEY_ID=your_access_key
-
 AWS_SECRET_ACCESS_KEY=your_secret_key
-
 AWS_REGION=ap-south-1
-
 AWS_BUCKET_NAME=your_bucket_name
 
 # CLOUDFRONT
 
 CLOUDFRONT_URL=https://your-cloudfront-url
 ```
+
+> **Note:**  
+> The FastAPI application runs inside Docker, while PostgreSQL runs on the host machine.  
+> The application connects to the host database using `host.docker.internal`.
+
+---
+
+# 🗄️ Database Setup
+
+## Create Database
+
+Open PostgreSQL and create a database:
+
+```sql
+CREATE DATABASE Ecommerce_CompanyArc_DB;
+```
+
+## Run Database Migrations
+
+After configuring `.env`, execute:
+
+```bash
+alembic upgrade head
+```
+
+Alembic will automatically create all required tables.
 
 ---
 
@@ -194,13 +227,19 @@ CLOUDFRONT_URL=https://your-cloudfront-url
 ## Clone Repository
 
 ```bash
-git clone <repository-url>
-cd Ecommerce-Postgresql
+git clone https://github.com/karankharvar2004/Ecommerce_FastAPI_Postgresql.git
+cd Ecommerce_FastAPI_Postgresql
 ```
 
 ---
 
-## Start Containers
+## Build and Run
+
+```bash
+docker compose up --build
+```
+
+Or run in detached mode:
 
 ```bash
 docker compose up --build -d
@@ -208,153 +247,97 @@ docker compose up --build -d
 
 ---
 
-## Verify Running Containers
+## Verify Running Container
 
 ```bash
 docker ps
 ```
 
-Expected:
+Expected output:
 
 ```text
-ecommerce_app
-ecommerce_db
+CONTAINER ID   IMAGE            PORTS                    NAMES
+xxxxxxxxxxxx   ecommerce_app    0.0.0.0:8000->8000/tcp   ecommerce_app
 ```
 
 ---
 
-## Run Database Migrations
-
-```bash
-docker exec -it ecommerce_app alembic upgrade head
-```
-
----
-
-## Open Swagger Docs
-
-```text
-http://localhost:8000/docs
-```
-
----
-
-# 🗄️ PostgreSQL Connection
-
-If connecting through pgAdmin:
-
-| Field | Value |
-|---------|---------|
-| Host | localhost |
-| Port | 5555 |
-| Username | postgres |
-| Password | your_password |
-| Database | Ecommerce_CompanyArc_DB |
-
----
-
-# 📦 Docker Hub Image
-
-Pull image directly:
-
-```bash
-docker pull karn21/ecommerce-fastapi:latest
-```
-
----
-
-# 🔄 Development Workflow
-
-## Start Project
-
-```bash
-docker compose up -d
-```
-
----
-
-## View Logs
-
-Application Logs:
-
-```bash
-docker logs -f ecommerce_app
-```
-
-Database Logs:
-
-```bash
-docker logs -f ecommerce_db
-```
-
----
-
-## Stop Project
-
-```bash
-docker compose down
-```
-
----
-
-## Rebuild Project
-
-```bash
-docker compose down
-
-docker compose up --build -d
-```
-
----
-
-# 🧪 API Testing
+# 🚀 Access API Documentation
 
 Swagger UI:
 
-```text
+```
 http://localhost:8000/docs
 ```
 
-All APIs can be tested directly from Swagger.
+ReDoc:
+
+```
+http://localhost:8000/redoc
+```
+
+---
+
+# 🔌 API Modules
+
+## Authentication
+
+| Method | Endpoint | Description |
+|----------|------------------|----------------|
+| POST | `/auth/register` | Register User |
+| POST | `/auth/login` | Login User |
+
+---
+
+## Products
+
+| Method | Endpoint | Description |
+|----------|------------------------|----------------------|
+| POST | `/product/create` | Create Product |
+| GET | `/product/list` | Product List |
+| GET | `/product/{id}` | Get Single Product |
+| PUT | `/product/{id}` | Update Product |
+| DELETE | `/product/{id}` | Soft Delete Product |
+
+---
+
+## Cart
+
+| Method | Endpoint | Description |
+|----------|----------------------|----------------------|
+| POST | `/cart/add` | Add Product To Cart |
+| PATCH | `/cart/update` | Update Cart Quantity |
+| DELETE | `/cart/remove` | Remove Product |
+| GET | `/cart/list` | Get Cart Details |
 
 ---
 
 # 🔐 Authentication Flow
 
-## Register User
+## 1. Register User
 
 ```text
 POST /auth/register
 ```
 
----
-
-## Login User
+## 2. Login User
 
 ```text
 POST /auth/login
 ```
 
-Returns:
+Response:
 
 ```json
 {
-  "access_token": "...",
-  "refresh_token": "..."
+    "access_token": "...",
+    "refresh_token": "..."
 }
 ```
 
----
+## 3. Authorize Swagger
 
-## Authorize Requests
-
-Click:
-
-```text
-Authorize
-```
-
-inside Swagger UI and provide:
+Click the **Authorize** button and enter:
 
 ```text
 Bearer <access_token>
@@ -366,108 +349,202 @@ Bearer <access_token>
 
 ```text
 Client
-    ↓
+   │
+   ▼
 FastAPI
-    ↓
+   │
+   ▼
 AWS S3
-    ↓
+   │
+   ▼
 CloudFront
-    ↓
+   │
+   ▼
 Public Image URL
 ```
 
 ---
 
-# 🛒 Cart Flow
+# 🛒 Cart Workflow
 
 ```text
 User
-    ↓
-Add Product To Cart
-    ↓
+   │
+   ▼
+Add Product
+   │
+   ▼
 Stock Validation
-    ↓
-Cart Item Created
-    ↓
-Update Quantity
-    ↓
-Remove Product
+   │
+   ▼
+Cart Updated
+   │
+   ▼
+Quantity Update / Remove Product
+   │
+   ▼
+Cart Total Calculation
+```
+
+---
+
+# 🏗️ Deployment Architecture
+
+```text
+                 Docker Hub
+                      │
+                      ▼
+         +---------------------------+
+         |   FastAPI Docker Image    |
+         +-------------+-------------+
+                       │
+          host.docker.internal
+                       │
+                       ▼
+         +---------------------------+
+         | PostgreSQL (Host Machine) |
+         |      + pgAdmin            |
+         +---------------------------+
+```
+
+### Workflow
+
+1. Clone repository.
+2. Create PostgreSQL database.
+3. Copy `.env.example` to `.env`.
+4. Configure environment variables.
+5. Run `alembic upgrade head`.
+6. Start Docker container.
+7. Open Swagger and test APIs.
+
+---
+
+# 📦 Docker Hub
+
+Pull the latest application image:
+
+```bash
+docker pull karn21/ecommerce-fastapi:latest
+```
+
+Run the container:
+
+```bash
+docker run --env-file .env -p 8000:8000 karn21/ecommerce-fastapi:latest
+```
+
+---
+
+# 🔄 Development Workflow
+
+## Start
+
+```bash
+docker compose up -d
+```
+
+## View Logs
+
+```bash
+docker logs -f ecommerce_app
+```
+
+## Stop
+
+```bash
+docker compose down
+```
+
+## Rebuild
+
+```bash
+docker compose down
+docker compose up --build -d
+```
+
+---
+
+# 🧪 Local Development
+
+Run without Docker:
+
+```bash
+source venv/bin/activate
+
+pip install -r requirements.txt
+
+alembic upgrade head
+
+uvicorn src.main:app --reload
 ```
 
 ---
 
 # 📊 Current Features Completed
 
-- Authentication Module
-- JWT Authentication
-- Product CRUD
-- Product Pagination
-- Product Sorting
-- Product Filters
-- AWS S3 Upload
-- CloudFront Integration
-- Cart Management
-- Stock Validation
-- Dockerization
-- PostgreSQL Integration
-- Alembic Migrations
+- ✅ Authentication Module
+- ✅ JWT Authentication
+- ✅ Product CRUD
+- ✅ Product Pagination
+- ✅ Product Sorting
+- ✅ Product Filtering
+- ✅ AWS S3 Upload
+- ✅ CloudFront Integration
+- ✅ Cart Management
+- ✅ Stock Validation
+- ✅ Dockerized FastAPI Application
+- ✅ External PostgreSQL Integration
+- ✅ Alembic Database Migrations
 
 ---
 
 # 🧹 Useful Docker Commands
 
-## Show Running Containers
+## Build Image
+
+```bash
+docker build -t ecommerce-fastapi .
+```
+
+## Start Project
+
+```bash
+docker compose up --build
+```
+
+## Running Containers
 
 ```bash
 docker ps
 ```
 
----
-
-## Show All Containers
+## View Logs
 
 ```bash
-docker ps -a
+docker logs -f ecommerce_app
 ```
 
----
-
-## Enter Application Container
-
-```bash
-docker exec -it ecommerce_app bash
-```
-
----
-
-## Restart Application
-
-```bash
-docker restart ecommerce_app
-```
-
----
-
-## Stop Containers
+## Stop Project
 
 ```bash
 docker compose down
 ```
 
----
-
-## Remove Containers & Volumes
+## Pull Latest Docker Hub Image
 
 ```bash
-docker compose down -v
+docker pull karn21/ecommerce-fastapi:latest
 ```
-
-⚠️ Warning: This deletes database data permanently.
 
 ---
 
 # 👨‍💻 Author
 
-**Karan**
+**Karan Kharvar**
 
-FastAPI | PostgreSQL | Docker | AWS | Backend Development
+**Python Backend Developer**  
+FastAPI • PostgreSQL • Docker • AWS S3 • CloudFront • SQLAlchemy • Alembic
+
+GitHub: https://github.com/karankharvar2004
+
+---
