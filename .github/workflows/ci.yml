@@ -11,11 +11,27 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
-    steps:
+    env:
+      DB_USER: postgres
+      DB_PASSWORD: password
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_NAME: ecommerce_test
 
+      SECRET_KEY: test_secret_key
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 60
+      REFRESH_TOKEN_EXPIRE_DAYS: 7
+
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_REGION: ap-south-1
+      AWS_BUCKET_NAME: test-bucket
+      CLOUDFRONT_URL: https://example.com
+
+    steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
@@ -29,14 +45,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Verify Python Installation
+      - name: Verify FastAPI Application
         run: |
-          python --version
-
-      - name: Verify Pip
-        run: |
-          pip --version
-
-      - name: Verify Installed Packages
-        run: |
-          pip list
+          python -c "from src.main import app; print('Application Loaded Successfully')"
