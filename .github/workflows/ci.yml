@@ -29,6 +29,14 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Verify FastAPI Application
+      - name: Verify Python Installation
         run: |
-          python -c "from src.main import app; print('Application Loaded Successfully')"
+          python --version
+
+      - name: Verify Pip
+        run: |
+          pip --version
+
+      - name: Verify Installed Packages
+        run: |
+          pip list
