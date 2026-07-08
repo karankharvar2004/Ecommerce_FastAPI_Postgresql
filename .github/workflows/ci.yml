@@ -90,10 +90,22 @@ jobs:
 
     needs: docker
 
-    if: false
-
     steps:
 
-      - name: Deployment Placeholder
-        run: |
-          echo "Deployment job will be added in Phase 4."
+      - name: Deploy Application to EC2
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+
+          script: |
+            cd /home/ubuntu/ecommerce-deployment
+
+            docker compose pull
+
+            docker compose up -d
+
+            docker image prune -f
+
+            docker ps
